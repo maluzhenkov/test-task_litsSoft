@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "server": "json-server-auth db.json --port 3001"
+    "server": "json-server-auth db.json -r routes.json --port 3001"
   },
   "dependencies": {
     "express": "^4.22.2",

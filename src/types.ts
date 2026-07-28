@@ -17,6 +17,13 @@ export interface TaskListParams {
   status?: TaskStatus;
 }
 
+export type StatusFilter = TaskStatus | "all";
+
+export interface TaskFilters {
+  status: StatusFilter;
+  search: string;
+}
+
 export interface Credentials {
   email: string;
   password: string;
@@ -30,4 +37,12 @@ export interface AuthUser {
 export interface AuthResponse {
   accessToken: string;
   user: AuthUser;
+}
+
+export type NotificationType = "success" | "error";
+
+export interface AppNotification {
+  id: number;
+  type: NotificationType;
+  message: string;
 }
