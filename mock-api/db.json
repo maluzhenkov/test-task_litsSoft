@@ -1,9 +1,37 @@
 {
   "tasks": [
-    { "id": 1, "title": "Настроить окружение", "description": "Установить зависимости проекта", "status": "todo", "priority": "medium", "createdAt": "2026-07-01T10:00:00.000Z" },
-    { "id": 2, "title": "Сверстать страницу логина", "description": "Форма email + пароль", "status": "in-progress", "priority": "high", "createdAt": "2026-07-02T09:30:00.000Z" },
-    { "id": 3, "title": "Настроить Pinia store", "description": "authStore и tasksStore", "status": "done", "priority": "high", "createdAt": "2026-07-03T14:00:00.000Z" },
-    { "id": 4, "title": "Написать README", "description": "Инструкция по запуску", "status": "todo", "priority": "low", "createdAt": "2026-07-04T11:15:00.000Z" }
+    {
+      "id": 1,
+      "title": "Настроить окружение",
+      "description": "Установить зависимости проекта",
+      "status": "todo",
+      "priority": "medium",
+      "createdAt": "2026-07-01T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "title": "Сверстать страницу логина",
+      "description": "Форма email + пароль",
+      "status": "in-progress",
+      "priority": "high",
+      "createdAt": "2026-07-02T09:30:00.000Z"
+    },
+    {
+      "id": 3,
+      "title": "Настроить Pinia store",
+      "description": "authStore и tasksStore",
+      "status": "done",
+      "priority": "high",
+      "createdAt": "2026-07-03T14:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "title": "Написать README",
+      "description": "Инструкция по запуску",
+      "status": "todo",
+      "priority": "low",
+      "createdAt": "2026-07-04T11:15:00.000Z"
+    }
   ],
   "users": []
 }
