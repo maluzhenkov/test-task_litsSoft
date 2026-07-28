@@ -33,5 +33,11 @@
       "createdAt": "2026-07-04T11:15:00.000Z"
     }
   ],
-  "users": []
+  "users": [
+    {
+      "email": "test@test.com",
+      "password": "$2a$10$bjcOxElHaLpoDbuUDVrkMeK1DWJiBI4NmJe0scjm3qqmOCp3pJ1Sy",
+      "id": 1
+    }
+  ]
 }
