@@ -25,11 +25,10 @@ export const useAuthStore = defineStore("auth", () => {
 
     try {
       const { data } = await authApi.login(credentials);
-      const userEmail = data.user?.email ?? credentials.email;
 
       token.value = data.accessToken;
-      email.value = userEmail;
-      saveSession(data.accessToken, userEmail);
+      email.value = data.user.email;
+      saveSession(data.accessToken, data.user.email);
 
       return true;
     } catch (requestError) {

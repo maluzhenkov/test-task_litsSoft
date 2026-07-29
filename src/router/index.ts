@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import { authGuard } from "@/router/guards";
 
 declare module "vue-router" {
   interface RouteMeta {
@@ -28,18 +28,6 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
-  const authStore = useAuthStore();
-
-  if (to.meta.onlyGuest && authStore.isAuthenticated) {
-    return { name: "tasks" };
-  }
-
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return { name: "login", query: { redirect: to.fullPath } };
-  }
-
-  return true;
-});
+router.beforeEach(authGuard);
 
 export default router;
