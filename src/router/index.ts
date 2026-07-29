@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/auth";
 declare module "vue-router" {
   interface RouteMeta {
     requiresAuth?: boolean;
+    onlyGuest?: boolean;
   }
 }
 
@@ -15,6 +16,7 @@ const router = createRouter({
       path: "/login",
       name: "login",
       component: () => import("@/views/LoginView.vue"),
+      meta: { onlyGuest: true },
     },
     {
       path: "/tasks",
@@ -28,6 +30,10 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const authStore = useAuthStore();
+
+  if (to.meta.onlyGuest && authStore.isAuthenticated) {
+    return { name: "tasks" };
+  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: "login", query: { redirect: to.fullPath } };

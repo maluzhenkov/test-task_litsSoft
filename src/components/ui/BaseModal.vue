@@ -27,7 +27,7 @@ onUnmounted(() => {
       @click.self="emit('close')"
     >
       <div
-        class="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl"
+        class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-5 shadow-xl"
         role="dialog"
         aria-modal="true"
         :aria-label="title"
