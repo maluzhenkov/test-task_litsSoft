@@ -16,7 +16,13 @@ export const createTask = (overrides: Partial<Task> = {}): Task => ({
 });
 
 export const createAxiosResponse = <T>(data: T): AxiosResponse<T> =>
-  ({ data, status: 200, statusText: "OK", headers: {}, config: {} }) as AxiosResponse<T>;
+  ({
+    data,
+    status: 200,
+    statusText: "OK",
+    headers: {},
+    config: {},
+  }) as AxiosResponse<T>;
 
 interface AxiosErrorOptions {
   status?: number;
@@ -38,7 +44,13 @@ export const createAxiosError = ({
   const response =
     status === undefined
       ? undefined
-      : ({ status, data, statusText: "", headers: {}, config } as AxiosResponse);
+      : ({
+          status,
+          data,
+          statusText: "",
+          headers: {},
+          config,
+        } as AxiosResponse);
 
   return new AxiosError(message, code, config, undefined, response);
 };

@@ -3,7 +3,11 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { tasksApi } from "@/api";
 import { useTasksStore } from "@/stores/tasks";
-import { createAxiosError, createAxiosResponse, createTask } from "@/test/factories";
+import {
+  createAxiosError,
+  createAxiosResponse,
+  createTask,
+} from "@/test/factories";
 import type { Task } from "@/types";
 
 const { notifySuccess, notifyError } = vi.hoisted(() => ({
@@ -156,7 +160,9 @@ describe("tasks store", () => {
   describe("createTask", () => {
     it("добавляет задачу и уведомляет об успехе", async () => {
       const created = createTask({ id: 10, ...payload });
-      vi.mocked(tasksApi.create).mockResolvedValue(createAxiosResponse(created));
+      vi.mocked(tasksApi.create).mockResolvedValue(
+        createAxiosResponse(created),
+      );
 
       const store = useTasksStore();
 
@@ -169,7 +175,10 @@ describe("tasks store", () => {
 
     it("при ошибке возвращает false, не меняет список и показывает уведомление", async () => {
       vi.mocked(tasksApi.create).mockRejectedValue(
-        createAxiosError({ status: 500, data: { message: "Внутренняя ошибка" } }),
+        createAxiosError({
+          status: 500,
+          data: { message: "Внутренняя ошибка" },
+        }),
       );
 
       const store = useTasksStore();
@@ -195,7 +204,9 @@ describe("tasks store", () => {
   describe("updateTask", () => {
     it("заменяет задачу в списке", async () => {
       const updated = createTask({ id: 2, title: "Новое название" });
-      vi.mocked(tasksApi.update).mockResolvedValue(createAxiosResponse(updated));
+      vi.mocked(tasksApi.update).mockResolvedValue(
+        createAxiosResponse(updated),
+      );
 
       const store = useTasksStore();
       store.items = [createTask({ id: 1 }), createTask({ id: 2 })];
