@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import { tasksApi } from "@/api";
+import { useApiClient } from "@/api";
 import { useNotifications } from "@/composables/useNotifications";
 import type {
   StatusFilter,
@@ -13,6 +13,7 @@ import type {
 import { getErrorMessage, isUnauthorizedError } from "@/utils/errors";
 
 export const useTasksStore = defineStore("tasks", () => {
+  const api = useApiClient();
   const { notifySuccess, notifyError } = useNotifications();
 
   const items = ref<Task[]>([]);
@@ -76,7 +77,7 @@ export const useTasksStore = defineStore("tasks", () => {
     error.value = null;
 
     try {
-      const { data } = await tasksApi.getAll();
+      const { data } = await api.tasks.getAll();
       items.value = data;
     } catch (requestError) {
       if (!isUnauthorizedError(requestError)) {
@@ -91,7 +92,7 @@ export const useTasksStore = defineStore("tasks", () => {
     isSubmitting.value = true;
 
     try {
-      const { data } = await tasksApi.create(payload);
+      const { data } = await api.tasks.create(payload);
       items.value.push(data);
       notifySuccess("Задача создана");
 
@@ -112,7 +113,7 @@ export const useTasksStore = defineStore("tasks", () => {
     isSubmitting.value = true;
 
     try {
-      const { data } = await tasksApi.update(id, payload);
+      const { data } = await api.tasks.update(id, payload);
       replaceTask(data);
       notifySuccess("Задача обновлена");
 
@@ -129,7 +130,7 @@ export const useTasksStore = defineStore("tasks", () => {
   const changeStatus = async (id: Task["id"], status: TaskStatus) =>
     withPending(id, async () => {
       try {
-        const { data } = await tasksApi.updateStatus(id, status);
+        const { data } = await api.tasks.updateStatus(id, status);
         replaceTask(data);
 
         return true;
@@ -143,7 +144,7 @@ export const useTasksStore = defineStore("tasks", () => {
   const deleteTask = async (id: Task["id"]) =>
     withPending(id, async () => {
       try {
-        await tasksApi.remove(id);
+        await api.tasks.remove(id);
         items.value = items.value.filter((item) => item.id !== id);
         notifySuccess("Задача удалена");
 

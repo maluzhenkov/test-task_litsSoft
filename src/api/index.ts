@@ -1,3 +1,5 @@
-export * as authApi from "./endpoints/auth";
-export * as tasksApi from "./endpoints/tasks";
-export { setUnauthorizedHandler } from "./instance";
+export { createApiClient } from "./client";
+export type { ApiClient, ApiClientOptions } from "./client";
+export { apiClientKey, useApiClient } from "./context";
+export type { AuthApi } from "./endpoints/auth";
+export type { TasksApi } from "./endpoints/tasks";

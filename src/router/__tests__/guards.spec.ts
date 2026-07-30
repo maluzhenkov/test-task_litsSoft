@@ -1,4 +1,3 @@
-import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 import type {
   NavigationGuardNext,
@@ -7,6 +6,7 @@ import type {
   RouteMeta,
 } from "vue-router";
 import { authGuard } from "@/router/guards";
+import { setupStoreContext } from "@/test/store-context";
 import { saveSession } from "@/utils/auth-storage";
 
 const from = {} as RouteLocationNormalizedLoadedGeneric;
@@ -18,7 +18,7 @@ const target = (meta: RouteMeta, fullPath = "/tasks") =>
 const login = () => saveSession("jwt-token", "test@test.com");
 
 describe("authGuard", () => {
-  beforeEach(() => setActivePinia(createPinia()));
+  beforeEach(() => setupStoreContext());
 
   it("уводит гостя с защищённого маршрута на логин и запоминает адрес", () => {
     const result = authGuard(target({ requiresAuth: true }), from, next);

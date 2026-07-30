@@ -21,6 +21,8 @@ const handleStatusChange = (event: Event) => {
   const { value } = event.target as HTMLSelectElement;
   emit("update-status", value as TaskStatus);
 };
+
+throw new Error("test error");
 </script>
 
 <template>

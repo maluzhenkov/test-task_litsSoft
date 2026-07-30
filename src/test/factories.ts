@@ -3,6 +3,8 @@ import {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { vi, type Mock } from "vitest";
+import type { AuthApi, TasksApi } from "@/api";
 import type { Task } from "@/types";
 
 export const createTask = (overrides: Partial<Task> = {}): Task => ({
@@ -54,3 +56,23 @@ export const createAxiosError = ({
 
   return new AxiosError(message, code, config, undefined, response);
 };
+
+type MockedResource<T> = { [K in keyof T]: Mock };
+
+/** Заглушка API-клиента: сторы принимают её через provide, сеть не участвует. */
+export interface ApiClientMock {
+  auth: MockedResource<AuthApi>;
+  tasks: MockedResource<TasksApi>;
+}
+
+export const createApiClientMock = (): ApiClientMock => ({
+  auth: { login: vi.fn(), register: vi.fn() },
+  tasks: {
+    getAll: vi.fn(),
+    getById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    updateStatus: vi.fn(),
+    remove: vi.fn(),
+  },
+});
