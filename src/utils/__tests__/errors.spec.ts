@@ -20,7 +20,10 @@ describe("getErrorMessage", () => {
   });
 
   it("отдаёт неизвестное строковое тело как есть, без пробелов по краям", () => {
-    const error = createAxiosError({ status: 400, data: "  Unexpected body  " });
+    const error = createAxiosError({
+      status: 400,
+      data: "  Unexpected body  ",
+    });
 
     expect(getErrorMessage(error)).toBe("Unexpected body");
   });

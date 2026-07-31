@@ -1,25 +1,18 @@
 import type { AxiosResponse } from "axios";
-import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { tasksApi } from "@/api";
 import { useTasksStore } from "@/stores/tasks";
-import { createAxiosError, createAxiosResponse, createTask } from "@/test/factories";
+import {
+  createAxiosError,
+  createAxiosResponse,
+  createTask,
+  type ApiClientMock,
+} from "@/test/factories";
+import { setupStoreContext } from "@/test/store-context";
 import type { Task } from "@/types";
 
 const { notifySuccess, notifyError } = vi.hoisted(() => ({
   notifySuccess: vi.fn(),
   notifyError: vi.fn(),
-}));
-
-vi.mock("@/api", () => ({
-  authApi: {},
-  tasksApi: {
-    getAll: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    updateStatus: vi.fn(),
-    remove: vi.fn(),
-  },
 }));
 
 vi.mock("@/composables/useNotifications", () => ({
@@ -34,8 +27,10 @@ const payload = {
 } as const;
 
 describe("tasks store", () => {
+  let api: ApiClientMock;
+
   beforeEach(() => {
-    setActivePinia(createPinia());
+    ({ api } = setupStoreContext());
     notifySuccess.mockClear();
     notifyError.mockClear();
   });
@@ -43,7 +38,7 @@ describe("tasks store", () => {
   describe("fetchTasks", () => {
     it("загружает список и снимает флаг загрузки", async () => {
       const tasks = [createTask({ id: 1 }), createTask({ id: 2 })];
-      vi.mocked(tasksApi.getAll).mockResolvedValue(createAxiosResponse(tasks));
+      api.tasks.getAll.mockResolvedValue(createAxiosResponse(tasks));
 
       const store = useTasksStore();
       await store.fetchTasks();
@@ -54,7 +49,7 @@ describe("tasks store", () => {
     });
 
     it("сохраняет сообщение об ошибке для показа с кнопкой «Повторить»", async () => {
-      vi.mocked(tasksApi.getAll).mockRejectedValue(
+      api.tasks.getAll.mockRejectedValue(
         createAxiosError({ code: "ERR_NETWORK" }),
       );
 
@@ -68,7 +63,7 @@ describe("tasks store", () => {
     });
 
     it("молчит на 401: разлогином занимается интерсептор", async () => {
-      vi.mocked(tasksApi.getAll).mockRejectedValue(
+      api.tasks.getAll.mockRejectedValue(
         createAxiosError({ status: 401, data: "jwt expired" }),
       );
 
@@ -156,7 +151,7 @@ describe("tasks store", () => {
   describe("createTask", () => {
     it("добавляет задачу и уведомляет об успехе", async () => {
       const created = createTask({ id: 10, ...payload });
-      vi.mocked(tasksApi.create).mockResolvedValue(createAxiosResponse(created));
+      api.tasks.create.mockResolvedValue(createAxiosResponse(created));
 
       const store = useTasksStore();
 
@@ -168,8 +163,11 @@ describe("tasks store", () => {
     });
 
     it("при ошибке возвращает false, не меняет список и показывает уведомление", async () => {
-      vi.mocked(tasksApi.create).mockRejectedValue(
-        createAxiosError({ status: 500, data: { message: "Внутренняя ошибка" } }),
+      api.tasks.create.mockRejectedValue(
+        createAxiosError({
+          status: 500,
+          data: { message: "Внутренняя ошибка" },
+        }),
       );
 
       const store = useTasksStore();
@@ -181,7 +179,7 @@ describe("tasks store", () => {
     });
 
     it("не дублирует уведомление на 401", async () => {
-      vi.mocked(tasksApi.create).mockRejectedValue(
+      api.tasks.create.mockRejectedValue(
         createAxiosError({ status: 401, data: "jwt expired" }),
       );
 
@@ -195,7 +193,7 @@ describe("tasks store", () => {
   describe("updateTask", () => {
     it("заменяет задачу в списке", async () => {
       const updated = createTask({ id: 2, title: "Новое название" });
-      vi.mocked(tasksApi.update).mockResolvedValue(createAxiosResponse(updated));
+      api.tasks.update.mockResolvedValue(createAxiosResponse(updated));
 
       const store = useTasksStore();
       store.items = [createTask({ id: 1 }), createTask({ id: 2 })];
@@ -214,7 +212,7 @@ describe("tasks store", () => {
     it("держит id в pendingIds на время запроса и обновляет задачу", async () => {
       let resolveStatus!: (response: AxiosResponse<Task>) => void;
 
-      vi.mocked(tasksApi.updateStatus).mockReturnValue(
+      api.tasks.updateStatus.mockReturnValue(
         new Promise<AxiosResponse<Task>>((resolve) => {
           resolveStatus = resolve;
         }),
@@ -234,7 +232,7 @@ describe("tasks store", () => {
     });
 
     it("оставляет прежний статус при ошибке", async () => {
-      vi.mocked(tasksApi.updateStatus).mockRejectedValue(
+      api.tasks.updateStatus.mockRejectedValue(
         createAxiosError({ status: 500, data: "Server error" }),
       );
 
@@ -251,9 +249,7 @@ describe("tasks store", () => {
 
   describe("deleteTask", () => {
     it("убирает задачу из списка", async () => {
-      vi.mocked(tasksApi.remove).mockResolvedValue(
-        createAxiosResponse(undefined),
-      );
+      api.tasks.remove.mockResolvedValue(createAxiosResponse(undefined));
 
       const store = useTasksStore();
       store.items = [createTask({ id: 1 }), createTask({ id: 2 })];
@@ -265,7 +261,7 @@ describe("tasks store", () => {
     });
 
     it("при ошибке оставляет задачу на месте", async () => {
-      vi.mocked(tasksApi.remove).mockRejectedValue(
+      api.tasks.remove.mockRejectedValue(
         createAxiosError({ status: 500, data: "Server error" }),
       );
 
@@ -279,7 +275,7 @@ describe("tasks store", () => {
   });
 
   it("reset возвращает стор к исходному состоянию", async () => {
-    vi.mocked(tasksApi.getAll).mockRejectedValue(
+    api.tasks.getAll.mockRejectedValue(
       createAxiosError({ code: "ERR_NETWORK" }),
     );
 

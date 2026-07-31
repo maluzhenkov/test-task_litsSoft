@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import { authApi } from "@/api";
+import { useApiClient } from "@/api";
 import type { Credentials } from "@/types";
 import {
   clearSession,
@@ -11,6 +11,8 @@ import {
 import { getErrorMessage } from "@/utils/errors";
 
 export const useAuthStore = defineStore("auth", () => {
+  const api = useApiClient();
+
   // Токен и email читаются из localStorage, поэтому сессия переживает F5.
   const token = ref<string | null>(readToken());
   const email = ref<string | null>(readEmail());
@@ -24,7 +26,7 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
 
     try {
-      const { data } = await authApi.login(credentials);
+      const { data } = await api.auth.login(credentials);
 
       token.value = data.accessToken;
       email.value = data.user.email;

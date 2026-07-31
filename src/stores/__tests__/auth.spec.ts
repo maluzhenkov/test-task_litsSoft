@@ -1,16 +1,14 @@
 import type { AxiosResponse } from "axios";
-import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { authApi } from "@/api";
+import { beforeEach, describe, expect, it } from "vitest";
 import { useAuthStore } from "@/stores/auth";
-import { createAxiosError, createAxiosResponse } from "@/test/factories";
+import {
+  createAxiosError,
+  createAxiosResponse,
+  type ApiClientMock,
+} from "@/test/factories";
+import { setupStoreContext } from "@/test/store-context";
 import type { AuthResponse } from "@/types";
 import { readEmail, readToken, saveSession } from "@/utils/auth-storage";
-
-vi.mock("@/api", () => ({
-  authApi: { login: vi.fn(), register: vi.fn() },
-  tasksApi: {},
-}));
 
 const credentials = { email: "test@test.com", password: "12345678" };
 
@@ -21,7 +19,11 @@ const authResponse = (overrides: Partial<AuthResponse> = {}): AuthResponse => ({
 });
 
 describe("auth store", () => {
-  beforeEach(() => setActivePinia(createPinia()));
+  let api: ApiClientMock;
+
+  beforeEach(() => {
+    ({ api } = setupStoreContext());
+  });
 
   it("по умолчанию не авторизован", () => {
     const store = useAuthStore();
@@ -42,9 +44,7 @@ describe("auth store", () => {
   });
 
   it("сохраняет токен и email после успешного входа", async () => {
-    vi.mocked(authApi.login).mockResolvedValue(
-      createAxiosResponse(authResponse()),
-    );
+    api.auth.login.mockResolvedValue(createAxiosResponse(authResponse()));
 
     const store = useAuthStore();
 
@@ -59,7 +59,7 @@ describe("auth store", () => {
   });
 
   it("берёт email из ответа сервера, а не из формы", async () => {
-    vi.mocked(authApi.login).mockResolvedValue(
+    api.auth.login.mockResolvedValue(
       createAxiosResponse(
         authResponse({ user: { id: 7, email: "canonical@test.com" } }),
       ),
@@ -73,7 +73,7 @@ describe("auth store", () => {
   });
 
   it("показывает понятную ошибку и не пускает внутрь при неверном пароле", async () => {
-    vi.mocked(authApi.login).mockRejectedValue(
+    api.auth.login.mockRejectedValue(
       createAxiosError({ status: 400, data: "Incorrect password" }),
     );
 
@@ -87,7 +87,7 @@ describe("auth store", () => {
   });
 
   it("сбрасывает прошлую ошибку при новой попытке входа", async () => {
-    vi.mocked(authApi.login).mockRejectedValueOnce(
+    api.auth.login.mockRejectedValueOnce(
       createAxiosError({ status: 400, data: "Cannot find user" }),
     );
 
@@ -96,9 +96,7 @@ describe("auth store", () => {
 
     expect(store.error).toBe("Пользователь с таким email не найден");
 
-    vi.mocked(authApi.login).mockResolvedValueOnce(
-      createAxiosResponse(authResponse()),
-    );
+    api.auth.login.mockResolvedValueOnce(createAxiosResponse(authResponse()));
     await store.login(credentials);
 
     expect(store.error).toBeNull();
@@ -107,7 +105,7 @@ describe("auth store", () => {
   it("держит isLoading только на время запроса", async () => {
     let resolveLogin!: (response: AxiosResponse<AuthResponse>) => void;
 
-    vi.mocked(authApi.login).mockReturnValue(
+    api.auth.login.mockReturnValue(
       new Promise<AxiosResponse<AuthResponse>>((resolve) => {
         resolveLogin = resolve;
       }),
@@ -125,9 +123,7 @@ describe("auth store", () => {
   });
 
   it("чистит состояние и localStorage при выходе", async () => {
-    vi.mocked(authApi.login).mockResolvedValue(
-      createAxiosResponse(authResponse()),
-    );
+    api.auth.login.mockResolvedValue(createAxiosResponse(authResponse()));
 
     const store = useAuthStore();
     await store.login(credentials);

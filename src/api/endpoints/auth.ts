@@ -1,8 +1,12 @@
-import request from "@/api/instance";
-import type { Credentials, AuthResponse } from "@/types";
+import type { AxiosInstance } from "axios";
+import type { AuthResponse, Credentials } from "@/types";
 
-export const login = (credentials: Credentials) =>
-  request.post<AuthResponse>("/login", credentials);
+export const createAuthApi = (http: AxiosInstance) => ({
+  login: (credentials: Credentials) =>
+    http.post<AuthResponse>("/login", credentials),
 
-export const register = (credentials: Credentials) =>
-  request.post<AuthResponse>("/register", credentials);
+  register: (credentials: Credentials) =>
+    http.post<AuthResponse>("/register", credentials),
+});
+
+export type AuthApi = ReturnType<typeof createAuthApi>;
